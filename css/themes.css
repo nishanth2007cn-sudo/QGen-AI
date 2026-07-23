@@ -1,0 +1,10 @@
+/* Theme specific styles and variables */
+.theme-dark-only {
+    display: none;
+}
+[data-theme="dark"] .theme-dark-only {
+    display: block;
+}
+[data-theme="dark"] .theme-light-only {
+    display: none;
+}

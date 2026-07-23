@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QGen-AI | Automated Programming Question Generation</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js & Highlight.js for chatbot markdown/code styling -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/themes.css">
+    
+</head>
+<body>
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top glass-effect">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fa-solid fa-microchip text-primary"></i> QGen-AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="generator.html">Generator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="exam.html">Exam Mode</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <button id="theme-toggle" class="btn btn-icon me-3">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <!-- Global AI Search Bar -->
+                    <div class="search-box me-3">
+                        <input id="global-ai-search" type="text" class="form-control rounded-pill glass-input" placeholder="Ask AI anything...">
+                        <i class="fa-solid fa-brain search-icon text-primary"></i>
+                    </div>
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle profile-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <img src="https://ui-avatars.com/api/?name=Static User&background=random" alt="Profile" class="rounded-circle" width="32">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="settings.html"><i class="fa-solid fa-cog me-2"></i>Settings</a></li>
+                            
+                                <li><a class="dropdown-item" href="admin.html"><i class="fa-solid fa-user-shield me-2"></i>Admin Panel</a></li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="login.html"><i class="fa-solid fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar glass-effect" id="sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="generator.html" class="nav-link"><i class="fa-solid fa-bolt"></i> Generator</a></li>
+                <li class="nav-item"><a href="exam.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> Exam Mode</a></li>
+                <li class="nav-item"><a href="paper_generator.html" class="nav-link"><i class="fa-solid fa-file-invoice"></i> Paper Gen</a></li>
+                <li class="nav-item"><a href="history.html" class="nav-link"><i class="fa-solid fa-history"></i> History</a></li>
+                <li class="nav-item"><a href="bookmarks.html" class="nav-link"><i class="fa-solid fa-bookmark"></i> Bookmarks</a></li>
+            </ul>
+        </div>
+
+        <div class="content-area container-fluid py-4">
+            
+<div class="container-fluid">
+    <!-- Exam Setup State -->
+    <div id="exam-setup" class="card card-glass p-5" style="max-width: 600px; margin: 40px auto;">
+        <h2 class="mb-4"><i class="fa-solid fa-file-signature text-primary me-2"></i>MCQ Exam Mode</h2>
+        <p class="text-secondary">Custom compile practice test sessions powered by Gemini AI. Complete with timing constraints.</p>
+        <hr class="mb-4">
+        
+        <form id="setup-form">
+            <div class="mb-3">
+                <label for="exam-topic" class="form-label">Subject / Topic</label>
+                <input type="text" class="form-control glass-input" id="exam-topic" required placeholder="e.g. Python Basics, SQL Joins, Binary Search">
+            </div>
+            <div class="mb-3">
+                <label for="exam-subtopic" class="form-label">Subtopic (Optional)</label>
+                <input type="text" class="form-control glass-input" id="exam-subtopic" placeholder="e.g. List Comprehension, Indexes">
+            </div>
+            <div class="mb-3">
+                <label for="exam-company" class="form-label">Target Company (Optional)</label>
+                <input type="text" class="form-control glass-input" id="exam-company" placeholder="e.g. Amazon, Google, Meta">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="exam-count" class="form-label">Question Count</label>
+                    <select class="form-select glass-input" id="exam-count">
+                        <option value="5" selected>5 Questions</option>
+                        <option value="10">10 Questions</option>
+                        <option value="15">15 Questions</option>
+                        <option value="20">20 Questions</option>
+                        <option value="25">25 Questions</option>
+                        <option value="50">50 Questions</option>
+                        <option value="100">100 Questions</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="exam-difficulty" class="form-label">Difficulty</label>
+                    <select class="form-select glass-input" id="exam-difficulty">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="exam-time" class="form-label">Time Limit (Minutes)</label>
+                <input type="number" class="form-control glass-input" id="exam-time" placeholder="e.g. 10" min="1" required value="10">
+            </div>
+            <button type="submit" class="btn btn-gradient w-100 py-3 rounded-pill mt-4">
+                <span id="start-btn-text">Start Exam</span>
+                <span id="start-btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Active Exam State -->
+    <div id="exam-active" class="row d-none">
+        <div class="col-md-8">
+            <div class="card card-glass p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="m-0 text-secondary">Question <span id="current-q-index">1</span> of <span id="total-q-count">5</span></h5>
+                    <div>
+                        <button id="flag-btn" class="btn btn-outline-warning btn-sm rounded-pill me-2"><i class="fa-solid fa-flag me-1"></i>Flag Question</button>
+                        <button id="review-later-btn" class="btn btn-outline-info btn-sm rounded-pill"><i class="fa-solid fa-clock me-1"></i>Review Later</button>
+                    </div>
+                </div>
+                
+                <div class="progress mb-4" style="height: 6px;">
+                    <div id="exam-progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 20%;"></div>
+                </div>
+
+                <div class="mb-4">
+                    <h4 id="question-text" class="mb-4"></h4>
+                    <div id="options-container" class="d-flex flex-column gap-3">
+                        <!-- Options generated dynamically -->
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button id="prev-btn" class="btn btn-outline-secondary rounded-pill px-4" disabled>Previous</button>
+                    <button id="next-btn" class="btn btn-primary rounded-pill px-4">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-glass p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="m-0"><i class="fa-solid fa-hourglass-half text-primary me-2"></i>Timer</h4>
+                    <h3 id="timer-text" class="text-danger m-0">--:--</h3>
+                </div>
+                <hr class="mb-4">
+
+                <h5 class="mb-3">Question Palette</h5>
+                <div id="palette-container" class="d-flex flex-wrap gap-2 mb-4">
+                    <!-- Palette buttons dynamically filled -->
+                </div>
+
+                <button id="submit-exam-btn" class="btn btn-danger w-100 py-3 rounded-pill">Submit Assessment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div>
+    </div>
+
+    <!-- Floating Global Chatbot Widget -->
+    <div id="chatbot-widget" class="position-fixed bottom-0 end-0 m-4" style="z-index: 1050;">
+        <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+            <i class="fa-solid fa-comments fa-lg"></i>
+        </button>
+        
+        <div id="chatbot-box" class="card card-glass shadow-lg d-none" style="width: 350px; height: 450px; position: absolute; bottom: 75px; right: 0;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-robot me-2"></i>QGen AI Tutor</span>
+                <div>
+                    <button id="chatbot-clear-btn" class="btn btn-sm btn-outline-light border-0 me-1" title="Clear Chat"><i class="fa-solid fa-trash"></i></button>
+                    <button id="chatbot-close-btn" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="chatbot-messages" class="card-body overflow-y-auto" style="height: 320px; font-size: 0.9rem;">
+                <!-- Filled via JS -->
+            </div>
+            <div class="card-footer bg-transparent border-top">
+                <form id="chatbot-form" class="input-group">
+                    <input id="chatbot-input" type="text" class="form-control glass-input" placeholder="Type a message..." required>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../js/main.js"></script>
+    
+<script>
+let questions = [];
+let currentIndex = 0;
+let userAnswers = {};
+let flaggedQuestions = {};
+let reviewLaterQuestions = {};
+let timerInterval;
+let timeRemaining = 600;
+let timeTaken = 0;
+let totalTimeAllocated = 600;
+
+document.getElementById('setup-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const topic = document.getElementById('exam-topic').value;
+    const subtopic = document.getElementById('exam-subtopic').value;
+    const company = document.getElementById('exam-company').value;
+    const count = document.getElementById('exam-count').value;
+    const difficulty = document.getElementById('exam-difficulty').value;
+    const minutes = parseInt(document.getElementById('exam-time').value) || 10;
+
+    const btnText = document.getElementById('start-btn-text');
+    const btnSpinner = document.getElementById('start-btn-spinner');
+
+    btnText.innerText = 'Creating Exam...';
+    btnSpinner.classList.remove('d-none');
+
+    fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            type: 'mcq', 
+            topic, 
+            subtopic, 
+            company, 
+            difficulty, 
+            count 
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        btnText.innerText = 'Start Exam';
+        btnSpinner.classList.add('d-none');
+
+        if (data.error || data.length === 0) {
+            alert('Failed to initialize exam. Please try again.');
+            return;
+        }
+
+        questions = data;
+        totalTimeAllocated = minutes * 60;
+        initExam();
+    });
+});
+
+function initExam() {
+    document.getElementById('exam-setup').classList.add('d-none');
+    document.getElementById('exam-active').classList.remove('d-none');
+
+    currentIndex = 0;
+    userAnswers = {};
+    flaggedQuestions = {};
+    reviewLaterQuestions = {};
+    timeRemaining = totalTimeAllocated;
+    timeTaken = 0;
+
+    startTimer();
+    renderQuestion();
+    renderPalette();
+}
+
+function startTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        timeTaken++;
+        updateTimerDisplay();
+
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            alert('Time limit reached. Submitting your answers automatically.');
+            submitExam();
+        }
+    }, 1000);
+}
+
+// Format timer as MM:SS
+function updateTimerDisplay() {
+    const mins = Math.floor(timeRemaining / 60);
+    const secs = timeRemaining % 60;
+    document.getElementById('timer-text').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function renderQuestion() {
+    const q = questions[currentIndex];
+    document.getElementById('current-q-index').innerText = currentIndex + 1;
+    document.getElementById('total-q-count').innerText = questions.length;
+    document.getElementById('question-text').innerText = q.details.question;
+
+    const barWidth = ((currentIndex + 1) / questions.length) * 100;
+    document.getElementById('exam-progress-bar').style.width = `${barWidth}%`;
+
+    const optionsContainer = document.getElementById('options-container');
+    optionsContainer.innerHTML = '';
+
+    const opts = q.details.options || ["A) Option A", "B) Option B", "C) Option C", "D) Option D"];
+    opts.forEach((option, optIdx) => {
+        const optionLetter = String.fromCharCode(65 + optIdx);
+        const optionDiv = document.createElement('div');
+        const isSelected = userAnswers[currentIndex] === optionLetter;
+        optionDiv.className = `mcq-option-item card card-glass p-3 ${isSelected ? 'border-primary bg-primary text-white' : ''}`;
+        optionDiv.style.cursor = 'pointer';
+        optionDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="form-check mb-0 me-3">
+                    <input class="form-check-input" type="radio" name="exam-option" id="exam-opt-${currentIndex}-${optionLetter}" value="${optionLetter}" ${isSelected ? 'checked' : ''}>
+                    <label class="form-check-label" for="exam-opt-${currentIndex}-${optionLetter}">
+                        <span class="option-letter badge ${isSelected ? 'bg-success' : 'bg-primary'} me-2">${optionLetter}</span>
+                        <span class="option-text">${option}</span>
+                    </label>
+                </div>
+            </div>
+        `;
+        
+        optionDiv.onclick = function() {
+            document.querySelectorAll('.mcq-option-item').forEach(card => {
+                card.classList.remove('border-primary', 'bg-primary', 'text-white');
+                card.querySelector('.option-letter').classList.remove('bg-success');
+                card.querySelector('.option-letter').classList.add('bg-primary');
+                card.querySelector('.form-check-input').checked = false;
+            });
+            optionDiv.classList.add('border-primary', 'bg-primary', 'text-white');
+            optionDiv.querySelector('.option-letter').classList.remove('bg-primary');
+            optionDiv.querySelector('.option-letter').classList.add('bg-success');
+            optionDiv.querySelector('.form-check-input').checked = true;
+            userAnswers[currentIndex] = optionLetter;
+            renderPalette();
+        };
+        optionsContainer.appendChild(optionDiv);
+    });
+
+    document.getElementById('prev-btn').disabled = currentIndex === 0;
+    document.getElementById('next-btn').innerText = currentIndex === questions.length - 1 ? 'Finish' : 'Next';
+    
+    // Update flagged state UI
+    const flagBtn = document.getElementById('flag-btn');
+    if (flaggedQuestions[currentIndex]) {
+        flagBtn.className = 'btn btn-warning btn-sm rounded-pill';
+    } else {
+        flagBtn.className = 'btn btn-outline-warning btn-sm rounded-pill';
+    }
+
+    // Update review later state UI
+    const reviewBtn = document.getElementById('review-later-btn');
+    if (reviewLaterQuestions[currentIndex]) {
+        reviewBtn.className = 'btn btn-info btn-sm rounded-pill';
+    } else {
+        reviewBtn.className = 'btn btn-outline-info btn-sm rounded-pill';
+    }
+}
+
+document.getElementById('flag-btn').onclick = function() {
+    flaggedQuestions[currentIndex] = !flaggedQuestions[currentIndex];
+    renderQuestion();
+    renderPalette();
+};
+
+document.getElementById('review-later-btn').onclick = function() {
+    reviewLaterQuestions[currentIndex] = !reviewLaterQuestions[currentIndex];
+    renderQuestion();
+    renderPalette();
+};
+
+document.getElementById('prev-btn').onclick = function() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+    }
+};
+
+document.getElementById('next-btn').onclick = function() {
+    if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+    } else {
+        submitExam();
+    }
+};
+
+function renderPalette() {
+    const container = document.getElementById('palette-container');
+    container.innerHTML = '';
+
+    questions.forEach((_, idx) => {
+        const btn = document.createElement('button');
+        btn.style.width = '40px';
+        btn.style.height = '40px';
+        
+        let colorClass = 'btn-outline-secondary';
+        if (idx === currentIndex) {
+            colorClass = 'btn-primary';
+        } else if (flaggedQuestions[idx]) {
+            colorClass = 'btn-warning';
+        } else if (reviewLaterQuestions[idx]) {
+            colorClass = 'btn-info';
+        } else if (userAnswers[idx]) {
+            colorClass = 'btn-success';
+        }
+
+        btn.className = `btn ${colorClass} rounded`;
+        btn.innerText = idx + 1;
+        btn.onclick = function() {
+            currentIndex = idx;
+            renderQuestion();
+        };
+        container.appendChild(btn);
+    });
+}
+
+document.getElementById('submit-exam-btn').onclick = function() {
+    if (confirm('Are you sure you want to submit the exam?')) {
+        submitExam();
+    }
+};
+
+function submitExam() {
+    clearInterval(timerInterval);
+    
+    // Construct answers mapping {question_id: selected_answer}
+    const answersPayload = {};
+    questions.forEach((q, idx) => {
+        answersPayload[q.id] = userAnswers[idx] || "";
+    });
+
+    fetch('/api/exam/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: 'MCQ Assessment Practice',
+            answers: answersPayload,
+            time_taken: timeTaken
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        window.location.href = `/results?id=${data.result_id}`;
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QGen-AI | Automated Programming Question Generation</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js & Highlight.js for chatbot markdown/code styling -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/themes.css">
+    
+</head>
+<body>
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top glass-effect">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fa-solid fa-microchip text-primary"></i> QGen-AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="generator.html">Generator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="exam.html">Exam Mode</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <button id="theme-toggle" class="btn btn-icon me-3">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <!-- Global AI Search Bar -->
+                    <div class="search-box me-3">
+                        <input id="global-ai-search" type="text" class="form-control rounded-pill glass-input" placeholder="Ask AI anything...">
+                        <i class="fa-solid fa-brain search-icon text-primary"></i>
+                    </div>
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle profile-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <img src="https://ui-avatars.com/api/?name=Static User&background=random" alt="Profile" class="rounded-circle" width="32">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="settings.html"><i class="fa-solid fa-cog me-2"></i>Settings</a></li>
+                            
+                                <li><a class="dropdown-item" href="admin.html"><i class="fa-solid fa-user-shield me-2"></i>Admin Panel</a></li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="login.html"><i class="fa-solid fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar glass-effect" id="sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="generator.html" class="nav-link"><i class="fa-solid fa-bolt"></i> Generator</a></li>
+                <li class="nav-item"><a href="exam.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> Exam Mode</a></li>
+                <li class="nav-item"><a href="paper_generator.html" class="nav-link"><i class="fa-solid fa-file-invoice"></i> Paper Gen</a></li>
+                <li class="nav-item"><a href="history.html" class="nav-link"><i class="fa-solid fa-history"></i> History</a></li>
+                <li class="nav-item"><a href="bookmarks.html" class="nav-link"><i class="fa-solid fa-bookmark"></i> Bookmarks</a></li>
+            </ul>
+        </div>
+
+        <div class="content-area container-fluid py-4">
+            
+<div class="container-fluid">
+    <div class="card card-glass p-4" style="max-width: 900px; margin: 40px auto;">
+        <h2><i class="fa-solid fa-file-invoice text-primary me-2"></i>Question Paper Generator</h2>
+        <p class="text-secondary">Generate complete exams or practice assessments. All questions are compiled into a printable layout.</p>
+        <hr class="mb-4">
+
+        <form id="paper-form">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="paper-topic" class="form-label">Subject / Topic</label>
+                    <input type="text" class="form-control glass-input" id="paper-topic" required placeholder="e.g. Data Structures, SQL">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="paper-count" class="form-label">Number of Questions</label>
+                    <select class="form-select glass-input" id="paper-count">
+                        <option value="3">3 Questions</option>
+                        <option value="5" selected>5 Questions</option>
+                        <option value="10">10 Questions</option>
+                        <option value="15">15 Questions</option>
+                        <option value="20">20 Questions</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="paper-difficulty" class="form-label">Target Difficulty</label>
+                    <select class="form-select glass-input" id="paper-difficulty">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="paper-type" class="form-label">Question Types</label>
+                    <select class="form-select glass-input" id="paper-type">
+                        <option value="mixed">Mixed Types</option>
+                        <option value="coding">Coding Questions Only</option>
+                        <option value="mcq">MCQ Questions Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="exam-format" class="form-label">Exam Format / Purpose</label>
+                    <select class="form-select glass-input" id="exam-format">
+                        <option value="College Exams">College Exams</option>
+                        <option value="Internal Exams">Internal Exams</option>
+                        <option value="Placement Tests">Placement Tests</option>
+                        <option value="Online Assessments">Online Assessments</option>
+                        <option value="Random Tests">Random Tests</option>
+                        <option value="Custom Tests">Custom Tests</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-gradient w-100 py-3 rounded-pill mt-4">
+                <span id="btn-paper-text">Compile Question Paper</span>
+                <span id="btn-paper-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+        </form>
+
+        <div id="paper-output" class="mt-5 d-none">
+            <hr class="my-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 id="output-paper-title">Generated Question Paper</h4>
+                <button class="btn btn-danger btn-sm rounded-pill" onclick="window.print()">
+                    <i class="fa-solid fa-print me-1"></i>Print / Save PDF
+                </button>
+            </div>
+            
+            <div id="paper-questions-list" class="p-3 bg-dark text-white rounded">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div>
+    </div>
+
+    <!-- Floating Global Chatbot Widget -->
+    <div id="chatbot-widget" class="position-fixed bottom-0 end-0 m-4" style="z-index: 1050;">
+        <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+            <i class="fa-solid fa-comments fa-lg"></i>
+        </button>
+        
+        <div id="chatbot-box" class="card card-glass shadow-lg d-none" style="width: 350px; height: 450px; position: absolute; bottom: 75px; right: 0;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-robot me-2"></i>QGen AI Tutor</span>
+                <div>
+                    <button id="chatbot-clear-btn" class="btn btn-sm btn-outline-light border-0 me-1" title="Clear Chat"><i class="fa-solid fa-trash"></i></button>
+                    <button id="chatbot-close-btn" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="chatbot-messages" class="card-body overflow-y-auto" style="height: 320px; font-size: 0.9rem;">
+                <!-- Filled via JS -->
+            </div>
+            <div class="card-footer bg-transparent border-top">
+                <form id="chatbot-form" class="input-group">
+                    <input id="chatbot-input" type="text" class="form-control glass-input" placeholder="Type a message..." required>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../js/main.js"></script>
+    
+<script>
+document.getElementById('paper-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const topic = document.getElementById('paper-topic').value;
+    const count = parseInt(document.getElementById('paper-count').value);
+    const difficulty = document.getElementById('paper-difficulty').value;
+    const type = document.getElementById('paper-type').value;
+    const format = document.getElementById('exam-format').value;
+
+    const btnText = document.getElementById('btn-paper-text');
+    const btnSpinner = document.getElementById('btn-paper-spinner');
+    
+    btnText.innerText = 'Compiling...';
+    btnSpinner.classList.remove('d-none');
+
+    document.getElementById('output-paper-title').innerText = `${format} on ${topic} (${difficulty})`;
+
+    const promises = [];
+    for(let i = 0; i < count; i++) {
+        let currentType = type;
+        if (type === 'mixed') {
+            const types = ['coding', 'mcq', 'debugging'];
+            currentType = types[Math.floor(Math.random() * types.length)];
+        }
+
+        promises.push(
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: currentType, topic, difficulty })
+            }).then(res => res.json())
+        );
+    }
+
+    Promise.all(promises)
+        .then(results => {
+            btnText.innerText = 'Compile Question Paper';
+            btnSpinner.classList.add('d-none');
+
+            const container = document.getElementById('paper-questions-list');
+            container.innerHTML = '';
+
+            results.forEach((dataList, index) => {
+                const data = Array.isArray(dataList) ? dataList[0] : dataList;
+                if (!data || data.error) return;
+                const details = data.details;
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'mb-5 pb-4 border-bottom border-secondary';
+                qDiv.id = `paper-q-${index}`;
+                qDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>Q${index + 1}. ${details.title} (${details.difficulty})</h5>
+                        <button class="btn btn-sm btn-outline-info rounded-pill" onclick="toggleEdit(${index})">
+                            <i class="fa-solid fa-pen me-1"></i>Edit
+                        </button>
+                    </div>
+                    
+                    <!-- Question Viewer -->
+                    <div id="q-view-${index}">
+                        <p style="white-space: pre-wrap;" class="my-3">${details.question}</p>
+                        ${details.options ? `
+                            <ul class="list-group list-group-flush bg-transparent">
+                                ${details.options.map(opt => `<li class="list-group-item bg-transparent text-white border-secondary">${opt}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+
+                    <!-- Question Editor (Hidden initially) -->
+                    <div id="q-edit-box-${index}" class="d-none mt-2">
+                        <textarea class="form-control bg-dark text-white border-info mb-2" rows="4" id="q-textarea-${index}">${details.question}</textarea>
+                        <button class="btn btn-sm btn-success rounded-pill" onclick="saveEdit(${index})">Save Changes</button>
+                    </div>
+                    
+                    ${details.hint ? `<p class="text-warning mt-2"><em>Hint: ${details.hint}</em></p>` : ''}
+                `;
+                container.appendChild(qDiv);
+            });
+
+            document.getElementById('paper-output').classList.remove('d-none');
+        })
+        .catch(err => {
+            btnText.innerText = 'Compile Question Paper';
+            btnSpinner.classList.add('d-none');
+            alert('Failed to compile the question paper.');
+        });
+});
+
+window.toggleEdit = function(index) {
+    const editBox = document.getElementById(`q-edit-box-${index}`);
+    const viewBox = document.getElementById(`q-view-${index}`);
+    
+    if (editBox.classList.contains('d-none')) {
+        editBox.classList.remove('d-none');
+        viewBox.classList.add('d-none');
+    } else {
+        editBox.classList.add('d-none');
+        viewBox.classList.remove('d-none');
+    }
+};
+
+window.saveEdit = function(index) {
+    const editedText = document.getElementById(`q-textarea-${index}`).value;
+    const viewBox = document.getElementById(`q-view-${index}`);
+    
+    // Update viewer paragraph
+    const p = viewBox.querySelector('p');
+    if (p) {
+        p.innerText = editedText;
+    }
+    
+    toggleEdit(index);
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QGen-AI | Automated Programming Question Generation</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js & Highlight.js for chatbot markdown/code styling -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/themes.css">
+    
+</head>
+<body>
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top glass-effect">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fa-solid fa-microchip text-primary"></i> QGen-AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="generator.html">Generator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="exam.html">Exam Mode</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <button id="theme-toggle" class="btn btn-icon me-3">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <!-- Global AI Search Bar -->
+                    <div class="search-box me-3">
+                        <input id="global-ai-search" type="text" class="form-control rounded-pill glass-input" placeholder="Ask AI anything...">
+                        <i class="fa-solid fa-brain search-icon text-primary"></i>
+                    </div>
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle profile-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <img src="https://ui-avatars.com/api/?name=Static User&background=random" alt="Profile" class="rounded-circle" width="32">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="settings.html"><i class="fa-solid fa-cog me-2"></i>Settings</a></li>
+                            
+                                <li><a class="dropdown-item" href="admin.html"><i class="fa-solid fa-user-shield me-2"></i>Admin Panel</a></li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="login.html"><i class="fa-solid fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar glass-effect" id="sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="generator.html" class="nav-link"><i class="fa-solid fa-bolt"></i> Generator</a></li>
+                <li class="nav-item"><a href="exam.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> Exam Mode</a></li>
+                <li class="nav-item"><a href="paper_generator.html" class="nav-link"><i class="fa-solid fa-file-invoice"></i> Paper Gen</a></li>
+                <li class="nav-item"><a href="history.html" class="nav-link"><i class="fa-solid fa-history"></i> History</a></li>
+                <li class="nav-item"><a href="bookmarks.html" class="nav-link"><i class="fa-solid fa-bookmark"></i> Bookmarks</a></li>
+            </ul>
+        </div>
+
+        <div class="content-area container-fluid py-4">
+            
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard</h2>
+        <span class="text-secondary">Welcome back, <strong class="text-primary">Static User</strong></span>
+    </div>
+    
+    <!-- Top Stats Row -->
+    <div class="row">
+        <!-- Questions Solved -->
+        <div class="col-md-3 col-6 mb-4">
+            <div class="card card-glass p-4 text-center h-100">
+                <i class="fa-solid fa-code fa-2x text-primary mb-2"></i>
+                <h3 id="stat-total" class="text-primary">--</h3>
+                <p class="text-secondary mb-0">Questions Solved</p>
+                <small class="text-muted" id="stat-daily-weekly">Daily: -- | Weekly: --</small>
+            </div>
+        </div>
+        <!-- Accuracy -->
+        <div class="col-md-3 col-6 mb-4">
+            <div class="card card-glass p-4 text-center h-100">
+                <i class="fa-solid fa-bullseye fa-2x text-success mb-2"></i>
+                <h3 id="stat-accuracy" class="text-success">--%</h3>
+                <p class="text-secondary mb-0">Avg Accuracy</p>
+            </div>
+        </div>
+        <!-- Current Streak -->
+        <div class="col-md-3 col-6 mb-4">
+            <div class="card card-glass p-4 text-center h-100">
+                <i class="fa-solid fa-fire fa-2x text-danger mb-2"></i>
+                <h3 id="stat-streak" class="text-danger">-- Days</h3>
+                <p class="text-secondary mb-0">Current Streak</p>
+                <small class="text-muted" id="stat-longest-streak">Longest: -- days</small>
+            </div>
+        </div>
+        <!-- Bookmarks Count -->
+        <div class="col-md-3 col-6 mb-4">
+            <div class="card card-glass p-4 text-center h-100">
+                <i class="fa-solid fa-bookmark fa-2x text-warning mb-2"></i>
+                <h3 id="stat-bookmarks" class="text-warning">--</h3>
+                <p class="text-secondary mb-0">Bookmarks Saved</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strengths & Weaknesses / Company Readiness Row -->
+    <div class="row mt-2">
+        <div class="col-md-4 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5><i class="fa-solid fa-circle-check text-success me-2"></i>Strong Topics</h5>
+                <ul id="strong-topics-list" class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-secondary py-2">Analyzing topics...</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5><i class="fa-solid fa-circle-xmark text-danger me-2"></i>Weak Topics</h5>
+                <ul id="weak-topics-list" class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-secondary py-2">Analyzing topics...</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5><i class="fa-solid fa-building text-info me-2"></i>Company Readiness</h5>
+                <ul id="company-readiness-list" class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-secondary py-2">Calculating readiness...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mt-2">
+        <!-- Timeline Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5>Practice Timeline (Last 7 Days)</h5>
+                <div style="position: relative; height:250px; width:100%">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Difficulty distribution Pie Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5>Difficulty Distribution</h5>
+                <div style="position: relative; height:250px; width:100%">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <!-- Radar Category breakdown -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5>Topic Distribution (Radar)</h5>
+                <div style="position: relative; height:250px; width:100%">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Achievements / Badges -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h5><i class="fa-solid fa-medal text-warning me-2"></i>Badges & Achievements</h5>
+                <div class="d-flex flex-wrap gap-3 mt-3" id="badges-container">
+                    <!-- Badges filled dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <!-- Activity Feed -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-glass p-4 h-100">
+                <h4>Recent Activity</h4>
+                <ul id="activity-list" class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-secondary py-3 text-center">Loading activity feed...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div>
+    </div>
+
+    <!-- Floating Global Chatbot Widget -->
+    <div id="chatbot-widget" class="position-fixed bottom-0 end-0 m-4" style="z-index: 1050;">
+        <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+            <i class="fa-solid fa-comments fa-lg"></i>
+        </button>
+        
+        <div id="chatbot-box" class="card card-glass shadow-lg d-none" style="width: 350px; height: 450px; position: absolute; bottom: 75px; right: 0;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-robot me-2"></i>QGen AI Tutor</span>
+                <div>
+                    <button id="chatbot-clear-btn" class="btn btn-sm btn-outline-light border-0 me-1" title="Clear Chat"><i class="fa-solid fa-trash"></i></button>
+                    <button id="chatbot-close-btn" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="chatbot-messages" class="card-body overflow-y-auto" style="height: 320px; font-size: 0.9rem;">
+                <!-- Filled via JS -->
+            </div>
+            <div class="card-footer bg-transparent border-top">
+                <form id="chatbot-form" class="input-group">
+                    <input id="chatbot-input" type="text" class="form-control glass-input" placeholder="Type a message..." required>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../js/main.js"></script>
+    
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/analytics')
+        .then(res => res.json())
+        .then(data => {
+            // Update Stats
+            document.getElementById('stat-total').innerText = data.total_questions;
+            document.getElementById('stat-daily-weekly').innerText = `Daily: ${data.daily_count} | Weekly: ${data.weekly_count}`;
+            document.getElementById('stat-accuracy').innerText = `${data.avg_accuracy}%`;
+            document.getElementById('stat-streak').innerText = `${data.current_streak} Days`;
+            document.getElementById('stat-longest-streak').innerText = `Longest: ${data.longest_streak} days`;
+            document.getElementById('stat-bookmarks').innerText = data.bookmarks_count;
+
+            // Render Strong Topics
+            const strongList = document.getElementById('strong-topics-list');
+            strongList.innerHTML = '';
+            data.strong_topics.forEach(t => {
+                strongList.innerHTML += `<li class="list-group-item bg-transparent text-success border-0 py-1"><i class="fa-solid fa-circle-check me-2"></i>${t}</li>`;
+            });
+
+            // Render Weak Topics
+            const weakList = document.getElementById('weak-topics-list');
+            weakList.innerHTML = '';
+            data.weak_topics.forEach(t => {
+                weakList.innerHTML += `<li class="list-group-item bg-transparent text-danger border-0 py-1"><i class="fa-solid fa-circle-xmark me-2"></i>${t}</li>`;
+            });
+
+            // Render Company Readiness
+            const companyList = document.getElementById('company-readiness-list');
+            companyList.innerHTML = '';
+            if (data.company_readiness.length === 0) {
+                companyList.innerHTML = '<li class="list-group-item bg-transparent text-secondary py-2 border-0">No company details practiced.</li>';
+            } else {
+                data.company_readiness.forEach(c => {
+                    companyList.innerHTML += `
+                        <li class="list-group-item bg-transparent text-primary py-2 border-0 border-bottom border-light d-flex justify-content-between align-items-center">
+                            <strong>${c.company}</strong>
+                            <span class="badge bg-info rounded-pill">${c.readiness}%</span>
+                        </li>
+                    `;
+                });
+            }
+
+            // Render Timeline Chart (Line)
+            new Chart(document.getElementById('timelineChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: data.timeline_labels,
+                    datasets: [{
+                        label: 'Questions Practiced',
+                        data: data.timeline_data,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Render Difficulty Chart (Pie)
+            new Chart(document.getElementById('difficultyChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.difficulty_dist),
+                    datasets: [{
+                        data: Object.values(data.difficulty_dist),
+                        backgroundColor: ['rgba(34, 197, 94, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(239, 68, 68, 0.7)']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Render Radar Chart
+            new Chart(document.getElementById('radarChart').getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: data.categories,
+                    datasets: [{
+                        label: 'Topic Solves',
+                        data: data.counts,
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        pointBackgroundColor: 'rgba(139, 92, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Render Badges
+            const badgesContainer = document.getElementById('badges-container');
+            badgesContainer.innerHTML = '';
+            if (data.badges.length === 0) {
+                badgesContainer.innerHTML = '<div class="text-secondary">Start solving questions to earn badges!</div>';
+            } else {
+                data.badges.forEach(b => {
+                    badgesContainer.innerHTML += `
+                        <div class="card card-glass p-2 text-center" style="width: 120px;">
+                            <i class="fa-solid ${b.icon} fa-2x text-warning mb-1"></i>
+                            <div class="fw-bold text-xs text-primary">${b.name}</div>
+                            <small class="text-muted" style="font-size: 0.65rem;">${b.desc}</small>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Activity list
+            const list = document.getElementById('activity-list');
+            list.innerHTML = '';
+            if (data.activity_feed.length === 0) {
+                list.innerHTML = '<li class="list-group-item bg-transparent text-secondary py-3 text-center">No recent activity</li>';
+            } else {
+                data.activity_feed.forEach(act => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item bg-transparent text-primary py-2 d-flex justify-content-between align-items-center border-0 border-bottom border-light';
+                    li.innerHTML = `
+                        <div>
+                            <span class="d-block text-secondary">${act.description}</span>
+                            <small class="text-muted text-xs">${act.timestamp}</small>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+        });
+});
+</script>
+
+</body>
+</html>
